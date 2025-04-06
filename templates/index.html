@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Configuration Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f7fa;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+    }
+    textarea, input[type="file"] {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2c7be5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+    .message {
+      padding: 10px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+    .success { background: #e1f9e6; color: #1f7a36; }
+    .error { background: #ffe9e9; color: #b30000; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    td input {
+      width: 100%;
+      border: none;
+      background: transparent;
+    }
+    .editable-section { margin-top: 30px; }
+
+    .export-buttons {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .export-buttons a button {
+      margin: 5px;
+      background-color: #00b894;
+    }
+
+    .export-buttons a button:hover {
+      background-color: #019874;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Configuration Manager</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+      <label>Upload Config (.ini or .json):</label>
+      <input type="file" name="config_file" accept=".ini,.json">
+      <label>Or Paste Config:</label>
+      <textarea name="config_content" rows="8" placeholder="[Database]&#10;host = localhost&#10;...">{{ pasted }}</textarea>
+      <button type="submit">Parse & Save</button>
+    </form>
+
+    {% if message %}
+      <div class="message {% if '✅' in message %}success{% else %}error{% endif %}">
+        {{ message }}
+      </div>
+    {% endif %}
+
+    {% if config %}
+      <div class="editable-section">
+        <h3>Edit Configuration</h3>
+        <form onsubmit="saveEdits(event)">
+          <table>
+            {% for section, items in config.items() %}
+              <tr><th colspan="2">{{ section }}</th></tr>
+              {% for key, value in items.items() %}
+                <tr>
+                  <td>{{ key }}</td>
+                  <td><input type="text" name="{{ section }}.{{ key }}" value="{{ value }}"></td>
+                </tr>
+              {% endfor %}
+            {% endfor %}
+          </table>
+          <br>
+          <button type="submit">Save Changes</button>
+        </form>
+      </div>
+
+      <!-- Export buttons -->
+      <div class="export-buttons">
+        <h3>Download Config</h3>
+        <a href="/export-config?format=ini">
+          <button type="button">⬇ Export as INI</button>
+        </a>
+
+        <a href="/export-config?format=json">
+          <button type="button">⬇ Export as JSON</button>
+        </a>
+
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function saveEdits(event) {
+      event.preventDefault();
+      const inputs = document.querySelectorAll('input[type="text"]');
+      const config = {};
+      inputs.forEach(input => {
+        const [section, key] = input.name.split('.');
+        if (!config[section]) config[section] = {};
+        config[section][key] = input.value;
+      });
+
+      fetch('/save-edited-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message || data.error))
+      .catch(err => alert("Error saving config: " + err));
+    }
+  </script>
+</body>
+</html>
