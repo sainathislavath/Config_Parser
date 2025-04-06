@@ -39,6 +39,7 @@ pip install flask
 ### Getting Started
 
 git clone https://github.com/sainathislavath/config_parser.git
+
 cd config_parser
 
 ### Run the application
