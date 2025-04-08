@@ -25,7 +25,7 @@ config-manager/
             └── uploads/ # Directory for uploaded config files
 
 
----
+
 ```
 ## 🧰 Requirements
 
