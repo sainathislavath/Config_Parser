@@ -78,7 +78,7 @@ def index():
             pasted_text = request.form.get("config_content", "").strip()
             file = request.files.get('config_file')
             config_string = ""
-            file_type = 'ini'  # default
+            file_type = 'ini'
 
             if file:
                 filename = file.filename
