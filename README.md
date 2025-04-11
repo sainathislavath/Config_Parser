@@ -16,7 +16,7 @@ A powerful web-based configuration management tool built using **Flask**. This t
 ---
 
 ## 📁 Project Structure
-
+```
 config-manager/ 
             ├── app.py # Flask application 
             ├── templates/ 
@@ -25,8 +25,8 @@ config-manager/
             └── uploads/ # Directory for uploaded config files
 
 
----
 
+```
 ## 🧰 Requirements
 
 - Python 3.6 or higher
